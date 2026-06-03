@@ -1,7 +1,6 @@
 package es.chachimente.curroscraper.application;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.batch.core.job.Job;
@@ -16,10 +15,10 @@ import org.springframework.batch.infrastructure.item.file.FlatFileItemReader;
 import org.springframework.batch.infrastructure.item.file.FlatFileItemWriter;
 import org.springframework.batch.infrastructure.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.infrastructure.item.file.builder.FlatFileItemWriterBuilder;
+import org.springframework.batch.infrastructure.item.file.transform.FieldExtractor;
 import org.springframework.batch.infrastructure.item.support.CompositeItemProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 
 import es.chachimente.curroscraper.model.CompanyInfo;
@@ -68,7 +67,7 @@ public class CurryScraperConfiguration {
 	public FlatFileItemReader<CurroURL> curroURLReader() {
 		return new FlatFileItemReaderBuilder<CurroURL>()
 				.name("curroURLReader")
-				.resource(new ClassPathResource("curros.csv"))
+				.resource(new FileSystemResource("data/input/curros.csv"))
 				.delimited()
 				.names("URL")
 				.targetType(CurroURL.class)
@@ -84,7 +83,7 @@ public class CurryScraperConfiguration {
 	public FlatFileItemWriter<CurroInfo> curroWriter() {
 		return new FlatFileItemWriterBuilder<CurroInfo>()
 				.name("curroWriter")
-				.resource(new FileSystemResource("curros-info.csv"))
+				.resource(new FileSystemResource("data/generated/curros-info.csv"))
 				.delimited()
 				.quoteCharacter("\"")
 				.names("title", "company", "location", "description", "URL")
@@ -106,7 +105,7 @@ public class CurryScraperConfiguration {
 	public ItemReader<CurroInfo> curroInfoReader() {
 		return new FlatFileItemReaderBuilder<CurroInfo>()
 				.name("curroInfoReader")
-				.resource(new FileSystemResource("curros-info.csv"))
+				.resource(new FileSystemResource("data/generated/curros-info.csv"))
 				.delimited()
 				.names("title", "company", "location", "description", "URL")
 				.targetType(CurroInfo.class)
@@ -127,7 +126,7 @@ public class CurryScraperConfiguration {
 	public ItemWriter<CompanyName> companyNameWriter() {
 		return new FlatFileItemWriterBuilder<CompanyName>()
 				.name("companyNameWriter")
-				.resource(new FileSystemResource("company-names.csv"))
+				.resource(new FileSystemResource("data/generated/company-names.csv"))
 				.delimited()
 				.names("name")
 				.build();
@@ -148,7 +147,7 @@ public class CurryScraperConfiguration {
 	public ItemReader<CompanyName> companyNameReader() {
 		return new FlatFileItemReaderBuilder<CompanyName>()
 				.name("companyNameReader")
-				.resource(new FileSystemResource("company-names.csv"))
+				.resource(new FileSystemResource("data/generated/company-names.csv"))
 				.delimited()
 				.names("name")
 				.targetType(CompanyName.class)
@@ -173,7 +172,7 @@ public class CurryScraperConfiguration {
 		processor.setDelegates(delegates);
 		
 		return processor;
-	}	
+	}
 
 	@Bean
 	public MalditasConsultorasScraper malditasConsultorasScraper() {
@@ -188,9 +187,33 @@ public class CurryScraperConfiguration {
 	@Bean
 	public FlatFileItemWriter<CompanyInfo> companyInfoWriter() {
 		return new FlatFileItemWriterBuilder<CompanyInfo>().name("companyInfoWriter")
-				.resource(new FileSystemResource("company-info.csv")).delimited()
+				.resource(new FileSystemResource("data/generated/company-info.csv")).delimited()
 				//.names("name", "fullName", "shortName", "linkedInURL", "companyURL", "rotacionHistorica", "lastUpdate", "company", "URL", "globalScore", "localScore", "lastUpdate")
-				.names("name", "malditasConsultorasInfo", "glassdoorInfo")
+				.fieldExtractor(new FieldExtractor<CompanyInfo>() {
+
+					@Override
+					public Object[] extract(CompanyInfo item) {
+						return new Object[] {
+								item.name(), 
+								item.malditasConsultorasInfo() != null ? item.malditasConsultorasInfo().fullName() : null, 
+								item.malditasConsultorasInfo() != null ? item.malditasConsultorasInfo().shortName() : null, 
+								item.malditasConsultorasInfo() != null ? item.malditasConsultorasInfo().linkedInURL() : null, 
+								item.malditasConsultorasInfo() != null ? item.malditasConsultorasInfo().companyURL() : null, 
+								item.malditasConsultorasInfo() != null ? item.malditasConsultorasInfo().rotacionHistorica() : null, 
+								item.malditasConsultorasInfo() != null ? item.malditasConsultorasInfo().lastUpdate() : null, 
+								item.glassdoorInfo() != null ? item.glassdoorInfo().company() : null, 
+								item.glassdoorInfo() != null ? item.glassdoorInfo().URL() : null, 
+								item.glassdoorInfo() != null ? item.glassdoorInfo().globalScore() : null,
+								item.glassdoorInfo() != null ? item.glassdoorInfo().nationalScore() : null,
+								item.glassdoorInfo() != null ? item.glassdoorInfo().localScore() : null, 
+								item.glassdoorInfo() != null ? item.glassdoorInfo().lastGlobalUpdate() : null,
+								item.glassdoorInfo() != null ? item.glassdoorInfo().lastNationalUpdate() : null,
+								item.glassdoorInfo() != null ? item.glassdoorInfo().lastLocalUpdate() : null
+						};
+					}
+
+				})
+				//.names("name", "malditasConsultorasInfo", "glassdoorInfo")
 				.build();
 	}
 }

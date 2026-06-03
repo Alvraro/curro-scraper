@@ -1,7 +1,8 @@
 package es.chachimente.curroscraper.model;
 
-import java.util.Date;
+import java.time.LocalDate;
 
-public record GlassdoorCompanyInfo(String company, String URL, Float globalScore, Float localScore, Date lastUpdate) {
-
+public record GlassdoorCompanyInfo(String company, String URL, 
+		Float globalScore, Float nationalScore, Float localScore, 
+		LocalDate lastGlobalUpdate, LocalDate lastNationalUpdate, LocalDate lastLocalUpdate) {
 }
