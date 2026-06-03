@@ -3,8 +3,6 @@ package es.chachimente.curroscraper.application;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.batch.core.job.Job;
-import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -17,7 +15,6 @@ import org.springframework.batch.infrastructure.item.file.builder.FlatFileItemRe
 import org.springframework.batch.infrastructure.item.file.builder.FlatFileItemWriterBuilder;
 import org.springframework.batch.infrastructure.item.file.transform.FieldExtractor;
 import org.springframework.batch.infrastructure.item.support.CompositeItemProcessor;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 
@@ -30,90 +27,43 @@ import es.chachimente.curroscraper.scraper.LinkedInCurroScraper;
 import es.chachimente.curroscraper.scraper.MalditasConsultorasScraper;
 
 @Configuration
-public class CurryScraperConfiguration {
-	
-	/*
-	@Bean
-	public JobOperatorFactoryBean jobOperator(JobRepository jobRepository) {
-		JobOperatorFactoryBean jobOperatorFactoryBean = new JobOperatorFactoryBean();
-		jobOperatorFactoryBean.setJobRepository;
-		jobOperatorFactoryBean.setTaskExecutor(new SimpleAsyncTaskExecutor());
-		return jobOperatorFactoryBean;
-	}
-	*/
-
-	// CurroImporter Job
-	@Bean
-	public Job curroImporterJob(JobRepository jobRepository) {
-		return new JobBuilder(jobRepository)
-				.start(curroScraperStep(jobRepository))
-				.next(curro2CompanyStep(jobRepository))
-				.next(companyScraperStep(jobRepository))
-				.build();
-	}
-
-	// curroScraper Step: Scrape LinkedIn for job info and write to output file
-	@Bean
-	public Step curroScraperStep(JobRepository jobRepository) {
-		return new StepBuilder(jobRepository)
-				.<CurroURL, CurroInfo> chunk(10)
-				.reader(curroURLReader())
-				.processor(curroScraper())
-				.writer(curroWriter())
-				.build();
-	}
-
-	@Bean
-	public FlatFileItemReader<CurroURL> curroURLReader() {
+public class SharedJobConfiguration {
+	public static FlatFileItemReader<CurroURL> curroURLReader(String path) {
 		return new FlatFileItemReaderBuilder<CurroURL>()
 				.name("curroURLReader")
-				.resource(new FileSystemResource("data/input/curros.csv"))
+				.resource(new FileSystemResource(path))
 				.delimited().delimiter(";")
 				.names("URL")
 				.targetType(CurroURL.class)
 				.build();
 	}
-
-	@Bean
-	public LinkedInCurroScraper curroScraper() {
+	
+	public static LinkedInCurroScraper curroScraper() {
 		return new LinkedInCurroScraper();
 	}
 	
-	@Bean
-	public FlatFileItemWriter<CurroInfo> curroWriter() {
+	public static FlatFileItemWriter<CurroInfo> curroWriter(String path) {
 		return new FlatFileItemWriterBuilder<CurroInfo>()
 				.name("curroWriter")
-				.resource(new FileSystemResource("data/generated/curros-info.csv"))
+				.resource(new FileSystemResource(path))
 				.delimited().delimiter(";")
 				.quoteCharacter("\"")
 				.names("title", "company", "location", "description", "URL")
 				.build();
 	}
-
-	// curro2Company Step: Extract company names from jobs info
-	@Bean
-	public Step curro2CompanyStep(JobRepository jobRepository) {
-		return new StepBuilder(jobRepository)
-				.<CurroInfo, CompanyName> chunk(10)
-				.reader(curroInfoReader())
-				.processor(curro2CompanyProcessor())
-				.writer(companyNameWriter())
-				.build();
-	}
 	
-	@Bean
-	public ItemReader<CurroInfo> curroInfoReader() {
+	public static ItemReader<CurroInfo> curroInfoReader(String path) {
 		return new FlatFileItemReaderBuilder<CurroInfo>()
 				.name("curroInfoReader")
-				.resource(new FileSystemResource("data/generated/curros-info.csv"))
+				.resource(new FileSystemResource(path))
 				.delimited().delimiter(";")
 				.names("title", "company", "location", "description", "URL")
 				.targetType(CurroInfo.class)
 				.build();
 	}
 
-	@Bean
-	public ItemProcessor<CurroInfo, CompanyName> curro2CompanyProcessor() {
+	
+	public static ItemProcessor<CurroInfo, CompanyName> curro2CompanyProcessor() {
 		return new ItemProcessor<CurroInfo, CompanyName>() {
 			@Override
 			public CompanyName process(CurroInfo curroInfo) throws Exception {
@@ -122,40 +72,27 @@ public class CurryScraperConfiguration {
 		};
 	}
 	
-	@Bean
-	public ItemWriter<CompanyName> companyNameWriter() {
+	public static ItemWriter<CompanyName> companyNameWriter(String path) {
 		return new FlatFileItemWriterBuilder<CompanyName>()
 				.name("companyNameWriter")
-				.resource(new FileSystemResource("data/generated/company-names.csv"))
+				.resource(new FileSystemResource(path))
 				.delimited().delimiter(";")
 				.names("name")
 				.build();
 	}
-	
-	// companyScraper Step: Scrape several sources for company info and write to output file
-	@Bean
-	public Step companyScraperStep(JobRepository jobRepository) {
-		return new StepBuilder(jobRepository)
-				.<CompanyName, CompanyInfo> chunk(10)
-				.reader(companyNameReader())
-				.processor(companyScraperProcessor())
-				.writer(companyInfoWriter())
-				.build();
-	}
 
-	@Bean
-	public ItemReader<CompanyName> companyNameReader() {
+	public static ItemReader<CompanyName> companyNameReader(String path) {
 		return new FlatFileItemReaderBuilder<CompanyName>()
 				.name("companyNameReader")
-				.resource(new FileSystemResource("data/generated/company-names.csv"))
+				.resource(new FileSystemResource(path))
 				.delimited().delimiter(";")
 				.names("name")
 				.targetType(CompanyName.class)
 				.build();
 	}
 
-	@Bean
-	public ItemProcessor<CompanyName, CompanyInfo> companyScraperProcessor() {		
+	
+	public static ItemProcessor<CompanyName, CompanyInfo> companyScraperProcessor() {		
 		CompositeItemProcessor<CompanyName, CompanyInfo> processor = new CompositeItemProcessor<>();
 
 		List delegates = new ArrayList<>(3);
@@ -174,20 +111,19 @@ public class CurryScraperConfiguration {
 		return processor;
 	}
 
-	@Bean
-	public MalditasConsultorasScraper malditasConsultorasScraper() {
+	
+	public static MalditasConsultorasScraper malditasConsultorasScraper() {
 		return new MalditasConsultorasScraper();
 	}
 	
-	@Bean
-	public GlassdoorScraper glassdoorScraper() {
+	
+	public static GlassdoorScraper glassdoorScraper() {
 		return new GlassdoorScraper();
 	}
 	
-	@Bean
-	public FlatFileItemWriter<CompanyInfo> companyInfoWriter() {
+	public static FlatFileItemWriter<CompanyInfo> companyInfoWriter(String path) {
 		return new FlatFileItemWriterBuilder<CompanyInfo>().name("companyInfoWriter")
-				.resource(new FileSystemResource("data/generated/company-info.csv")).delimited().delimiter(";")
+				.resource(new FileSystemResource(path)).delimited().delimiter(";")
 				//.names("name", "fullName", "shortName", "linkedInURL", "companyURL", "rotacionHistorica", "lastUpdate", "company", "URL", "globalScore", "localScore", "lastUpdate")
 				.fieldExtractor(new FieldExtractor<CompanyInfo>() {
 
@@ -214,6 +150,18 @@ public class CurryScraperConfiguration {
 
 				})
 				//.names("name", "malditasConsultorasInfo", "glassdoorInfo")
+				.build();
+	}
+
+
+	// companyScraper Step: Scrape several sources for company info and write to output file
+	//
+	public static Step companyScraperStep(JobRepository jobRepository, String companiesInputFile, String companyInfoOutputFile) {
+		return new StepBuilder(jobRepository)
+				.<CompanyName, CompanyInfo> chunk(10)
+				.reader(SharedJobConfiguration.companyNameReader(companiesInputFile))
+				.processor(SharedJobConfiguration.companyScraperProcessor())
+				.writer(SharedJobConfiguration.companyInfoWriter(companyInfoOutputFile))
 				.build();
 	}
 }
