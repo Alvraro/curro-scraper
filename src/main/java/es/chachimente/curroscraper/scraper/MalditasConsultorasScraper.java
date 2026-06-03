@@ -31,9 +31,10 @@ public class MalditasConsultorasScraper extends Scraper implements ItemProcessor
 	@Override
 	public CompanyInfo process(CompanyInfo companyInfo) {
 		try {
+			log.info(String.format("Processing company '%s'...", companyInfo.name()));
 			MalditasConsultorasCompanyInfo malditasConsultorasInfo = scrapeCompanyInfo(companyInfo.name());
+			log.info(String.format("Done company '%s'!", companyInfo.name()));
 			companyInfo = new CompanyInfo(companyInfo.name(), malditasConsultorasInfo, companyInfo.glassdoorInfo());
-			
 		} catch (ParseException | IOException e) {
 			log.error("Error scraping company info for " + companyInfo.name(), e);
 		}
@@ -41,8 +42,6 @@ public class MalditasConsultorasScraper extends Scraper implements ItemProcessor
 	}
 	
 	private MalditasConsultorasCompanyInfo scrapeCompanyInfo(String companyName) throws ParseException, IOException {
-		log.info(String.format("Processing curro: '%s'", companyName));
-
 		// Fields to extract
 		String companyURL, fullName, shortName, linkedInURL;
 		LocalDate lastUpdate;

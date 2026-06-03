@@ -68,7 +68,7 @@ public class CurryScraperConfiguration {
 		return new FlatFileItemReaderBuilder<CurroURL>()
 				.name("curroURLReader")
 				.resource(new FileSystemResource("data/input/curros.csv"))
-				.delimited()
+				.delimited().delimiter(";")
 				.names("URL")
 				.targetType(CurroURL.class)
 				.build();
@@ -84,7 +84,7 @@ public class CurryScraperConfiguration {
 		return new FlatFileItemWriterBuilder<CurroInfo>()
 				.name("curroWriter")
 				.resource(new FileSystemResource("data/generated/curros-info.csv"))
-				.delimited()
+				.delimited().delimiter(";")
 				.quoteCharacter("\"")
 				.names("title", "company", "location", "description", "URL")
 				.build();
@@ -106,7 +106,7 @@ public class CurryScraperConfiguration {
 		return new FlatFileItemReaderBuilder<CurroInfo>()
 				.name("curroInfoReader")
 				.resource(new FileSystemResource("data/generated/curros-info.csv"))
-				.delimited()
+				.delimited().delimiter(";")
 				.names("title", "company", "location", "description", "URL")
 				.targetType(CurroInfo.class)
 				.build();
@@ -127,7 +127,7 @@ public class CurryScraperConfiguration {
 		return new FlatFileItemWriterBuilder<CompanyName>()
 				.name("companyNameWriter")
 				.resource(new FileSystemResource("data/generated/company-names.csv"))
-				.delimited()
+				.delimited().delimiter(";")
 				.names("name")
 				.build();
 	}
@@ -148,7 +148,7 @@ public class CurryScraperConfiguration {
 		return new FlatFileItemReaderBuilder<CompanyName>()
 				.name("companyNameReader")
 				.resource(new FileSystemResource("data/generated/company-names.csv"))
-				.delimited()
+				.delimited().delimiter(";")
 				.names("name")
 				.targetType(CompanyName.class)
 				.build();
@@ -187,7 +187,7 @@ public class CurryScraperConfiguration {
 	@Bean
 	public FlatFileItemWriter<CompanyInfo> companyInfoWriter() {
 		return new FlatFileItemWriterBuilder<CompanyInfo>().name("companyInfoWriter")
-				.resource(new FileSystemResource("data/generated/company-info.csv")).delimited()
+				.resource(new FileSystemResource("data/generated/company-info.csv")).delimited().delimiter(";")
 				//.names("name", "fullName", "shortName", "linkedInURL", "companyURL", "rotacionHistorica", "lastUpdate", "company", "URL", "globalScore", "localScore", "lastUpdate")
 				.fieldExtractor(new FieldExtractor<CompanyInfo>() {
 

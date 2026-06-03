@@ -33,7 +33,9 @@ public class GlassdoorScraper extends Scraper implements ItemProcessor<CompanyIn
 	@Override
 	public CompanyInfo process(CompanyInfo companyInfo) {
 		try {
+			log.info(String.format("Processing company '%s'...", companyInfo.name()));
 			GlassdoorCompanyInfo glassdoorInfo = scrapeCompanyInfo(companyInfo.name());
+			log.info(String.format("Done company '%s'!", companyInfo.name()));
 			companyInfo = new CompanyInfo(companyInfo.name(), companyInfo.malditasConsultorasInfo(), glassdoorInfo);
 			
 		} catch (ParseException | IOException e) {
@@ -42,13 +44,11 @@ public class GlassdoorScraper extends Scraper implements ItemProcessor<CompanyIn
 		return companyInfo;
 	}
 	
-	private GlassdoorCompanyInfo scrapeCompanyInfo(String companyName) throws ParseException, IOException {
-		log.info(String.format("Processing curro: '%s'", companyName));
-		
+	private GlassdoorCompanyInfo scrapeCompanyInfo(String companyName) throws ParseException, IOException {	
 		// Fields to extract
-		String company, companyURL; 
-		Float globalScore, nationalScore, localScore; 
-		LocalDate lastGlobalUpdate, lastNationalUpdate, lastLocalUpdate;
+		String company = COMPANY_NOT_FOUND, companyURL = COMPANY_NOT_FOUND; 
+		Float globalScore = null, nationalScore = null, localScore = null;
+		LocalDate lastGlobalUpdate = null, lastNationalUpdate = null, lastLocalUpdate = null;
 		
 		// Search for the company name
 		String searchURL = String.format("%s/Search/results.htm?keyword=%s", GLASSDOOR_BASE_URL, companyName);
@@ -60,7 +60,7 @@ public class GlassdoorScraper extends Scraper implements ItemProcessor<CompanyIn
 		}
 		catch (Exception e) {
 			log.warn(String.format("Company '%s' not found on Glassdoor", companyName));
-			return new GlassdoorCompanyInfo(Scraper.COMPANY_NOT_FOUND, Scraper.COMPANY_NOT_FOUND, null, null, null, null, null, null);
+			return new GlassdoorCompanyInfo(COMPANY_NOT_FOUND, COMPANY_NOT_FOUND, null, null, null, null, null, null);
 		}
 		
 		// Open the first search result (if any)
@@ -76,19 +76,49 @@ public class GlassdoorScraper extends Scraper implements ItemProcessor<CompanyIn
 		document = connection.url(reviewsURL).userAgent(USER_AGENT).get();
 
 		// Extract global score and last update date
-		globalScore = extractScore(document);
-		lastGlobalUpdate = extractLastUpdate(document);
+		try {
+			globalScore = extractScore(document);			
+		}
+		catch (Exception e) {
+			log.warn(String.format("Global score not found for company '%s'", companyName));
+		}
+		try {
+			lastGlobalUpdate = extractLastUpdate(document);
+		}
+		catch (Exception e) {
+			log.warn(String.format("Global last update not found for company '%s'", companyName));
+		}
 		
 		// Extract national and local scores and last update dates
 		//https://www.glassdoor.es/Opiniones/Electronic-Arts-Opiniones-E1628.htm?filter.location=Espa%C3%B1a&filter.locationId=219&filter.locationType=N
 		document = connection.url(reviewsURL + "?filter.location=" + COUNTRY + "&filter.locationId=219&filter.locationType=N").userAgent(USER_AGENT).get();
-		nationalScore = extractScore(document);
-		lastNationalUpdate = extractLastUpdate(document);
+		try {
+			nationalScore = extractScore(document);			
+		}
+		catch (Exception e) {
+			log.warn(String.format("National score not found for company '%s'", companyName));
+		}
+		try {
+			lastNationalUpdate = extractLastUpdate(document);
+		}
+		catch (Exception e) {
+			log.warn(String.format("National last update not found for company '%s'", companyName));
+		}
 		
 		//https://www.glassdoor.es/Opiniones/Electronic-Arts-Opiniones-E1628.htm?filter.location=Madrid&filter.locationId=10887&filter.locationType=S
-		document = connection.url(reviewsURL + "?filter.location=" + CITY + "&filter.locationId=10887&filter.locationType=S").userAgent(USER_AGENT).get();		
-		localScore = extractScore(document);
-		lastLocalUpdate = extractLastUpdate(document);
+		document = connection.url(reviewsURL + "?filter.location=" + CITY + "&filter.locationId=10887&filter.locationType=S").userAgent(USER_AGENT).get();
+		try {
+			localScore = extractScore(document);			
+		}
+		catch (Exception e) {
+			log.warn(String.format("Local score not found for company '%s'", companyName));
+		}
+		try {
+			lastLocalUpdate = extractLastUpdate(document);
+		}
+		catch (Exception e) {
+			log.warn(String.format("Local last update not found for company '%s'", companyName));
+		}
 
 		return new GlassdoorCompanyInfo(company, companyURL, globalScore, nationalScore, localScore, lastGlobalUpdate, lastNationalUpdate, lastLocalUpdate);
 	}
