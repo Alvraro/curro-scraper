@@ -1,4 +1,4 @@
-package es.chachimente.curroscraper.application.curro;
+package es.chachimente.curroscraper.application.curroimporter;
 
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -14,7 +14,7 @@ import es.chachimente.curroscraper.model.CurroInfo;
 import es.chachimente.curroscraper.model.CurroURL;
 
 @Configuration
-public class CurryScraperConfiguration {
+public class JobConfiguration {
 	// Input
 	private static final String CURROS_INPUT_FILE = "data/curro-scraper/input/curros.csv";
 	

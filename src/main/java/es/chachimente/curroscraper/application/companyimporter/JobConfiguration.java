@@ -1,4 +1,4 @@
-package es.chachimente.curroscraper.application.company;
+package es.chachimente.curroscraper.application.companyimporter;
 
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import es.chachimente.curroscraper.application.SharedJobConfiguration;
 
 @Configuration
-public class CompanyScraperConfiguration {
+public class JobConfiguration {
 	// Input
 	private static final String COMPANIES_INPUT_FILE = "data/company-scraper/input/company-names.csv";
 	

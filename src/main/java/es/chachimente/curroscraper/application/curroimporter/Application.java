@@ -1,12 +1,12 @@
-package es.chachimente.curroscraper.application.company;
+package es.chachimente.curroscraper.application.curroimporter;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class CompanyScraperApplication {
+public class Application {
 
 	public static void main(String[] args) {
-		SpringApplication.run(CompanyScraperApplication.class, args);
+		SpringApplication.run(Application.class, args);
 	}
 }

@@ -8,13 +8,13 @@ import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import es.chachimente.curroscraper.application.curro.CurryScraperApplication;
+import es.chachimente.curroscraper.application.curroimporter.Application;
 import es.chachimente.curroscraper.model.CompanyInfo;
 import es.chachimente.curroscraper.model.GlassdoorCompanyInfo;
 import es.chachimente.curroscraper.scraper.GlassdoorScraper;
 import es.chachimente.curroscraper.scraper.Scraper;
 
-@SpringBootTest(classes = CurryScraperApplication.class, properties = "spring.batch.job.enabled=false")
+@SpringBootTest(classes = Application.class, properties = "spring.batch.job.enabled=false")
 class GlassdoorScraperTest {
 
 	@Test
