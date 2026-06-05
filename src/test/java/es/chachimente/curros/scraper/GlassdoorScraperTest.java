@@ -24,8 +24,8 @@ class GlassdoorScraperTest {
 		final Float globalScore = 4.0f;
 		final Float nationalScore = 3.9f;
 		final Float localScore = 3.9f;
-		final LocalDate lastGlobalUpdate = LocalDate.of(2026, 5, 29);
-		final LocalDate lastNationalUpdate = LocalDate.of(2026, 5, 29);
+		final LocalDate lastGlobalUpdate = LocalDate.of(2026, 6, 3);
+		final LocalDate lastNationalUpdate = LocalDate.of(2026, 6, 3);
 		final LocalDate lastLocalUpdate = LocalDate.of(2026, 5, 28);
 		
 		CompanyInfo companyInfo = new CompanyInfo(companyName, null, null);
