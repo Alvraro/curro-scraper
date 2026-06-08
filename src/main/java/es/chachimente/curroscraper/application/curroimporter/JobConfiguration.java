@@ -18,7 +18,7 @@ public class JobConfiguration {
 	private static final String DATA_FOLDER = "data/curro-importer/";
 	
 	// Input
-	private static final String CURROS_INPUT_FILE = DATA_FOLDER + "input/curro-urls.csv";
+	private static final String CURROS_INPUT_FILE = DATA_FOLDER + "input/curros.csv";
 	
 	// Output
 	private static final String CURROS_INFO_FILE = DATA_FOLDER + "generated/curro-info.csv";
