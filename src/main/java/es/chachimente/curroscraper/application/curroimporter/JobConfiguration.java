@@ -15,13 +15,15 @@ import es.chachimente.curroscraper.model.CurroURL;
 
 @Configuration
 public class JobConfiguration {
+	private static final String DATA_FOLDER = "data/curro-importer/";
+	
 	// Input
-	private static final String CURROS_INPUT_FILE = "data/curro-scraper/input/curros.csv";
+	private static final String CURROS_INPUT_FILE = DATA_FOLDER + "input/curro-urls.csv";
 	
 	// Output
-	private static final String CURROS_INFO_FILE = "data/curro-scraper/generated/curros-info.csv";
-	private static final String COMPANY_NAMES_FILE = "data/curro-scraper/generated/company-names.csv";
-	private static final String COMPANY_INFO_FILE = "data/curro-scraper/generated/company-info.csv";
+	private static final String CURROS_INFO_FILE = DATA_FOLDER + "generated/curro-info.csv";
+	private static final String COMPANY_NAMES_FILE = DATA_FOLDER + "generated/company-names.csv";
+	private static final String COMPANY_INFO_FILE = DATA_FOLDER + "generated/company-info.csv";		
 
 	// CurroImporter Job
 	@Bean

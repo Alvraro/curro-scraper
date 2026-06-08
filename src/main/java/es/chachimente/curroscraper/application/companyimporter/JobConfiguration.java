@@ -10,11 +10,13 @@ import es.chachimente.curroscraper.application.SharedJobConfiguration;
 
 @Configuration
 public class JobConfiguration {
+	private static final String DATA_FOLDER = "data/company-importer/";
+	
 	// Input
-	private static final String COMPANIES_INPUT_FILE = "data/company-scraper/input/company-names.csv";
+	private static final String COMPANIES_INPUT_FILE = DATA_FOLDER + "input/company-names.csv";
 	
 	// Output
-	private static final String COMPANY_INFO_FILE = "data/company-scraper/generated/company-info.csv";
+	private static final String COMPANY_INFO_FILE = DATA_FOLDER + "generated/company-info.csv";
 	
 	// CompanyImporter Job
 	@Bean
