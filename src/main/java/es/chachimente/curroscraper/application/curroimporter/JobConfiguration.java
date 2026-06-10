@@ -5,6 +5,7 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,15 +16,20 @@ import es.chachimente.curroscraper.model.CurroURL;
 
 @Configuration
 public class JobConfiguration {
-	private static final String DATA_FOLDER = "data/curro-importer/";
+	@Value("${curro-importer.data-folder}")
+	private static String DATA_FOLDER;
 	
 	// Input
-	private static final String CURROS_INPUT_FILE = DATA_FOLDER + "input/curros.csv";
+	@Value("${curro-importer.input.curros-file}")
+	private String CURROS_INPUT_FILE;
 	
 	// Output
-	private static final String CURROS_INFO_FILE = DATA_FOLDER + "generated/curro-info.csv";
-	private static final String COMPANY_NAMES_FILE = DATA_FOLDER + "generated/company-names.csv";
-	private static final String COMPANY_INFO_FILE = DATA_FOLDER + "generated/company-info.csv";		
+	@Value("${curro-importer.output.curro-info-file}")
+	private String CURROS_INFO_FILE;
+	@Value("${curro-importer.output.company-names-file}")
+	private String COMPANY_NAMES_FILE;
+	@Value("${curro-importer.output.company-info-file}")
+	private String COMPANY_INFO_FILE;
 
 	// CurroImporter Job
 	@Bean
