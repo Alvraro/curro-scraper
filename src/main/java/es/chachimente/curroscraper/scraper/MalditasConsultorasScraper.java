@@ -49,7 +49,7 @@ public class MalditasConsultorasScraper extends Scraper implements ItemProcessor
 		Float rotacionHistorica;
 		
 		// Search for the company name
-		String searchURL = String.format("%s/?s=%s", MALDITAS_CONSULTORAS_BASE_URL, companyName);
+		String searchURL = String.format("%s/?s=Opiniones de %s", MALDITAS_CONSULTORAS_BASE_URL, companyName);
 
 		Connection connection = Jsoup.connect(searchURL).userAgent(USER_AGENT).timeout(TIMEOUT);
 		Document document = connection.get();

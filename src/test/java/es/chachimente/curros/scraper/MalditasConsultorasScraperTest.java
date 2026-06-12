@@ -1,7 +1,6 @@
 package es.chachimente.curros.scraper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.time.LocalDate;
 
@@ -19,14 +18,31 @@ class MalditasConsultorasScraperTest {
 
 	@Test
 	void testFullData() {
-		final String companyName = "knowmad mood";
-		final String fullName = "knowmad mood";
-		final String shortName = "knowmad mood";
-		final String linkedInURL = "https://www.linkedin.com/company/knowmad-mood";
-		final String companyURL = "https://malditasconsultoras.com/opiniones-de-knowmad-mood/";
-		final Float rotacionHistorica = 54.35f;
-		final LocalDate lastUpdate = LocalDate.of(2024, 6, 13);
-		
+		testCompany("knowmad mood", "knowmad mood", "knowmad mood", "https://www.linkedin.com/company/knowmad-mood", "https://malditasconsultoras.com/opiniones-de-knowmad-mood/", 54.35f, LocalDate.of(2024, 6, 13));
+	}
+	
+	@Test
+	void testCompanyNotInFirstPage() {
+		testCompany("Keepler Data Tech", "Keepler Data Tech", "Keepler", "https:/www.linkedin.com/company/keepler", "https://malditasconsultoras.com/opiniones-de-keepler/", 28.96f, LocalDate.of(2025, 1, 7));
+	}
+
+	@Test
+	void testCompanyNotFound() {
+		testCompany("nonexistent company", Scraper.COMPANY_NOT_FOUND, Scraper.COMPANY_NOT_FOUND, Scraper.COMPANY_NOT_FOUND, Scraper.COMPANY_NOT_FOUND, null, null);
+	}
+	
+	@Test
+	void testCompanyNotFirstResultPlexus() {
+		testCompany("Plexus", "Plexus Tech", "Plexus", "https:/www.linkedin.com/company/plexus-tech", "https://malditasconsultoras.com/opiniones-de-plexus/", 45.65f, LocalDate.of(2025, 1, 6));
+	}
+
+	@Test
+	void testCompanyNotFirstResultTecdata() {
+		testCompany("TECDATA", "Grupo TECDATA Engineering", "Grupo TECDATA Engineering", "https://www.linkedin.com/company/tecdata-engineering", "https://malditasconsultoras.com/opiniones-de-tecdata/", 54.42f, LocalDate.of(2024, 7, 8));
+	}
+	
+	// Common test function
+	void testCompany(String companyName, String expectedFullName, String expectedShortName, String expectedLinkedInURL, String expectedCompanyURL, Float expectedRotacionHistorica, LocalDate expectedLastUpdate) {
 		CompanyInfo companyInfo = new CompanyInfo(companyName, null, null);
 		MalditasConsultorasScraper scraper = new MalditasConsultorasScraper();
 		
@@ -34,30 +50,11 @@ class MalditasConsultorasScraperTest {
 		assertEquals(companyName, result.name());
 		
 		MalditasConsultorasCompanyInfo mcInfo = result.malditasConsultorasInfo();
-		assertEquals(fullName, mcInfo.fullName());
-		assertEquals(shortName, mcInfo.shortName());
-		assertEquals(linkedInURL, mcInfo.linkedInURL());
-		assertEquals(companyURL, mcInfo.companyURL());
-		assertEquals(rotacionHistorica, mcInfo.rotacionHistorica());
-		assertEquals(lastUpdate, mcInfo.lastUpdate());
-	}
-
-	@Test
-	void testCompanyNotFound() {
-		final String fakeCompanyName = "nonexistent company";
-		
-		CompanyInfo companyInfo = new CompanyInfo(fakeCompanyName, null, null);
-		MalditasConsultorasScraper scraper = new MalditasConsultorasScraper();
-		
-		CompanyInfo result = scraper.process(companyInfo);
-		assertEquals(fakeCompanyName, result.name());
-		
-		MalditasConsultorasCompanyInfo mcInfo = result.malditasConsultorasInfo();
-		assertEquals(Scraper.COMPANY_NOT_FOUND, mcInfo.fullName());
-		assertEquals(Scraper.COMPANY_NOT_FOUND, mcInfo.shortName());
-		assertEquals(Scraper.COMPANY_NOT_FOUND, mcInfo.linkedInURL());
-		assertEquals(Scraper.COMPANY_NOT_FOUND, mcInfo.companyURL());
-		assertNull(mcInfo.rotacionHistorica());
-		assertNull(mcInfo.lastUpdate());
+		assertEquals(expectedFullName, mcInfo.fullName());
+		assertEquals(expectedShortName, mcInfo.shortName());
+		assertEquals(expectedLinkedInURL, mcInfo.linkedInURL());
+		assertEquals(expectedCompanyURL, mcInfo.companyURL());
+		assertEquals(expectedRotacionHistorica, mcInfo.rotacionHistorica());
+		assertEquals(expectedLastUpdate, mcInfo.lastUpdate());
 	}
 }
