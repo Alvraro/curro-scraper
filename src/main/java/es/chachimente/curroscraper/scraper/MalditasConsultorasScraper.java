@@ -22,6 +22,7 @@ public class MalditasConsultorasScraper extends Scraper implements ItemProcessor
 	private static final Logger log = LoggerFactory.getLogger(MalditasConsultorasScraper.class);
 	private static final String MALDITAS_CONSULTORAS_BASE_URL = "https://malditasconsultoras.com";
 	private DecimalFormat rotacionHistoricaFormat;
+	private int TIMEOUT = 40 * 1000; // e.g. Teknei 22s // TODO profile! maybe reduce timeout and add retries?
 	
 	public MalditasConsultorasScraper() {
 		rotacionHistoricaFormat = new DecimalFormat();
@@ -49,8 +50,8 @@ public class MalditasConsultorasScraper extends Scraper implements ItemProcessor
 		
 		// Search for the company name
 		String searchURL = String.format("%s/?s=%s", MALDITAS_CONSULTORAS_BASE_URL, companyName);
-		
-		Connection connection = Jsoup.connect(searchURL).userAgent(USER_AGENT);		
+
+		Connection connection = Jsoup.connect(searchURL).userAgent(USER_AGENT).timeout(TIMEOUT);
 		Document document = connection.get();
 
 		// Open the first search result (if any)

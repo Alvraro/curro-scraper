@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.Step;
+import org.springframework.batch.core.step.builder.ChunkOrientedStepBuilder;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.infrastructure.item.ItemProcessor;
 import org.springframework.batch.infrastructure.item.ItemReader;
@@ -17,6 +18,7 @@ import org.springframework.batch.infrastructure.item.file.transform.FieldExtract
 import org.springframework.batch.infrastructure.item.support.CompositeItemProcessor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import es.chachimente.curroscraper.model.CompanyInfo;
 import es.chachimente.curroscraper.model.CompanyName;
@@ -105,7 +107,7 @@ public class SharedJobConfiguration {
 		});
 		// Then we have one processor per source to enrich CompanyInfo 
 		delegates.add(malditasConsultorasScraper());
-		delegates.add(glassdoorScraper());		
+		delegates.add(glassdoorScraper());
 		processor.setDelegates(delegates);
 		
 		return processor;
@@ -153,15 +155,32 @@ public class SharedJobConfiguration {
 				.build();
 	}
 
-
 	// companyScraper Step: Scrape several sources for company info and write to output file
-	//
-	public static Step companyScraperStep(JobRepository jobRepository, String companiesInputFile, String companyInfoOutputFile) {
-		return new StepBuilder(jobRepository)
-				.<CompanyName, CompanyInfo> chunk(10)
+	public static Step companyScraperStep(JobRepository jobRepository, ConcurrentMode concurrentMode, String companiesInputFile, String companyInfoOutputFile) {
+		ChunkOrientedStepBuilder<CompanyName, CompanyInfo> flow = new StepBuilder(jobRepository)
+				.<CompanyName, CompanyInfo> chunk(50)
 				.reader(SharedJobConfiguration.companyNameReader(companiesInputFile))
 				.processor(SharedJobConfiguration.companyScraperProcessor())
-				.writer(SharedJobConfiguration.companyInfoWriter(companyInfoOutputFile))
-				.build();
+				.writer(SharedJobConfiguration.companyInfoWriter(companyInfoOutputFile));
+
+		System.err.println("Configuring companyScraperStep with concurrency mode: " + concurrentMode);
+
+		switch(concurrentMode) {
+			case SINGLE_THREADED_STEP:
+				// No additional configuration needed
+				break;
+			case MULTI_THREADED_STEP:
+				ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+				taskExecutor.setCorePoolSize(10);
+				taskExecutor.setMaxPoolSize(10);
+				//taskExecutor.setQueueCapacity(100);
+				taskExecutor.setThreadNamePrefix("companyScraper-");
+				taskExecutor.initialize();
+				flow = flow.taskExecutor(taskExecutor);
+				//flow = flow.taskExecutor(new SimpleAsyncTaskExecutor("companyScraper-"));
+				break;
+		}
+
+		return flow.build();
 	}
 }

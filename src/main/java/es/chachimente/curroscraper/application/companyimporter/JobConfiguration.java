@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import es.chachimente.curroscraper.application.ConcurrentMode;
 import es.chachimente.curroscraper.application.SharedJobConfiguration;
 
 @Configuration
@@ -22,11 +23,15 @@ public class JobConfiguration {
 	@Value("${company-importer.output.company-info-file}")
 	private String COMPANY_INFO_FILE;
 	
+	// Concurrency settings
+	@Value("${company-importer.company-scraper.concurrent-mode}")
+	private ConcurrentMode concurrentMode;
+
 	// CompanyImporter Job
 	@Bean
 	public Job companyImporterJob(JobRepository jobRepository) {
 		return new JobBuilder(jobRepository)
-				.start(SharedJobConfiguration.companyScraperStep(jobRepository, COMPANIES_INPUT_FILE, COMPANY_INFO_FILE))
+				.start(SharedJobConfiguration.companyScraperStep(jobRepository, concurrentMode, COMPANIES_INPUT_FILE, COMPANY_INFO_FILE))
 				.build();
 	}
 }
