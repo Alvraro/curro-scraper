@@ -1,7 +1,6 @@
 package es.chachimente.curros.scraper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.time.LocalDate;
 
@@ -19,15 +18,33 @@ class GlassdoorScraperTest {
 
 	@Test
 	void testFullData() {
-		final String companyName = "knowmad mood";
-		final String glassdoorURL = "https://www.glassdoor.es/Resumen/Trabajar-en-knowmad-mood-EI_IE297765.12,24.htm";
-		final Float globalScore = 4.0f;
-		final Float nationalScore = 3.9f;
-		final Float localScore = 3.9f;
-		final LocalDate lastGlobalUpdate = LocalDate.of(2026, 6, 3);
-		final LocalDate lastNationalUpdate = LocalDate.of(2026, 6, 3);
-		final LocalDate lastLocalUpdate = LocalDate.of(2026, 5, 28);
-		
+		testCompany("knowmad mood", "https://www.glassdoor.es/Resumen/Trabajar-en-knowmad-mood-EI_IE297765.12,24.htm", 4.0f, 3.9f, 3.9f, LocalDate.of(2026, 6, 10), LocalDate.of(2026, 6, 10), LocalDate.of(2026, 5, 28), 366, 251, 141);
+	}
+
+	@Test
+	void testFullDataNoReviewScrolling() {
+		testCompany("Civica", "https://www.glassdoor.es/Resumen/Trabajar-en-Civica-EI_IE35357.12,18.htm", 3.0f, 4.2f, null, LocalDate.of(2026, 1, 30), LocalDate.of(2026, 1, 30), null, 5, 4, 0);
+	}
+	
+	@Test
+	void testFullDataMoreThan1kReviews() {
+		testCompany("Amazon", "https://www.glassdoor.es/Resumen/Trabajar-en-Amazon-EI_IE6036.12,18.htm", 3.5f, 3.6f, 3.8f, LocalDate.of(2026, 6, 15), LocalDate.of(2026, 6, 15), LocalDate.of(2026, 6, 7), 4065, 1492, 521);
+	}
+	
+	@Test
+	void testFullDataMoreThan10kReviews() {		
+		testCompany("Accenture", "https://www.glassdoor.es/Resumen/Trabajar-en-Accenture-EI_IE4138.12,21.htm", 3.7f, 3.7f, 3.7f, LocalDate.of(2026, 6, 15), LocalDate.of(2026, 6, 15), LocalDate.of(2026, 6, 15), 11329, 1889, 1106);
+	}
+	
+	@Test
+	void testCompanyNotFound() {
+		testCompany(Scraper.COMPANY_NOT_FOUND, Scraper.COMPANY_NOT_FOUND, null, null, null, null, null, null, null, null, null);
+	}
+	
+	// Common test function
+	private void testCompany(String companyName, String glassdoorURL, Float globalScore, Float nationalScore,
+			Float localScore, LocalDate lastGlobalUpdate, LocalDate lastNationalUpdate, LocalDate lastLocalUpdate,
+			Integer globalNumberOfReviews, Integer nationalNumberOfReviews, Integer localNumberOfReviews) {
 		CompanyInfo companyInfo = new CompanyInfo(companyName, null, null);
 		GlassdoorScraper scraper = new GlassdoorScraper();
 		
@@ -38,31 +55,13 @@ class GlassdoorScraperTest {
 		assertEquals(companyName, glassdoorInfo.company());
 		assertEquals(glassdoorURL, glassdoorInfo.URL());
 		assertEquals(globalScore, glassdoorInfo.globalScore());
-		assertEquals(nationalScore, glassdoorInfo.nationalScore());
-		assertEquals(localScore, glassdoorInfo.localScore());
 		assertEquals(lastGlobalUpdate, glassdoorInfo.lastGlobalUpdate());
+		assertEquals(globalNumberOfReviews, glassdoorInfo.globalNumberOfReviews());
+		assertEquals(nationalScore, glassdoorInfo.nationalScore());
 		assertEquals(lastNationalUpdate, glassdoorInfo.lastNationalUpdate());
+		assertEquals(nationalNumberOfReviews, glassdoorInfo.nationalNumberOfReviews());
+		assertEquals(localScore, glassdoorInfo.localScore());
 		assertEquals(lastLocalUpdate, glassdoorInfo.lastLocalUpdate());
-	}
-
-	@Test
-	void testCompanyNotFound() {
-		final String fakeCompanyName = "nonexistent company";
-		
-		CompanyInfo companyInfo = new CompanyInfo(fakeCompanyName, null, null);
-		GlassdoorScraper scraper = new GlassdoorScraper();
-		
-		CompanyInfo result = scraper.process(companyInfo);
-		assertEquals(fakeCompanyName, result.name());
-		
-		GlassdoorCompanyInfo glassdoorInfo = result.glassdoorInfo();
-		assertEquals(Scraper.COMPANY_NOT_FOUND, glassdoorInfo.company());
-		assertEquals(Scraper.COMPANY_NOT_FOUND, glassdoorInfo.URL());
-		assertNull(glassdoorInfo.globalScore());
-		assertNull(glassdoorInfo.nationalScore());
-		assertNull(glassdoorInfo.localScore());
-		assertNull(glassdoorInfo.lastGlobalUpdate());
-		assertNull(glassdoorInfo.lastNationalUpdate());
-		assertNull(glassdoorInfo.lastLocalUpdate());
+		assertEquals(localNumberOfReviews, glassdoorInfo.localNumberOfReviews());
 	}
 }

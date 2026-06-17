@@ -146,7 +146,10 @@ public class SharedJobConfiguration {
 								item.glassdoorInfo() != null ? item.glassdoorInfo().localScore() : null, 
 								item.glassdoorInfo() != null ? item.glassdoorInfo().lastGlobalUpdate() : null,
 								item.glassdoorInfo() != null ? item.glassdoorInfo().lastNationalUpdate() : null,
-								item.glassdoorInfo() != null ? item.glassdoorInfo().lastLocalUpdate() : null
+								item.glassdoorInfo() != null ? item.glassdoorInfo().lastLocalUpdate() : null,
+								item.glassdoorInfo() != null ? item.glassdoorInfo().globalNumberOfReviews() : null,
+								item.glassdoorInfo() != null ? item.glassdoorInfo().nationalNumberOfReviews() : null,
+								item.glassdoorInfo() != null ? item.glassdoorInfo().localNumberOfReviews() : null
 						};
 					}
 
@@ -158,7 +161,7 @@ public class SharedJobConfiguration {
 	// companyScraper Step: Scrape several sources for company info and write to output file
 	public static Step companyScraperStep(JobRepository jobRepository, ConcurrentMode concurrentMode, String companiesInputFile, String companyInfoOutputFile) {
 		ChunkOrientedStepBuilder<CompanyName, CompanyInfo> flow = new StepBuilder(jobRepository)
-				.<CompanyName, CompanyInfo> chunk(50)
+				.<CompanyName, CompanyInfo> chunk(256)
 				.reader(SharedJobConfiguration.companyNameReader(companiesInputFile))
 				.processor(SharedJobConfiguration.companyScraperProcessor())
 				.writer(SharedJobConfiguration.companyInfoWriter(companyInfoOutputFile));
