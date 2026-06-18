@@ -18,31 +18,31 @@ class GlassdoorScraperTest {
 
 	@Test
 	void testFullData() {
-		testCompany("knowmad mood", "https://www.glassdoor.es/Resumen/Trabajar-en-knowmad-mood-EI_IE297765.12,24.htm", 4.0f, 3.9f, 3.9f, LocalDate.of(2026, 6, 10), LocalDate.of(2026, 6, 10), LocalDate.of(2026, 5, 28), 366, 251, 141);
+		testCompany("knowmad mood", "https://www.glassdoor.es/Resumen/Trabajar-en-knowmad-mood-EI_IE297765.12,24.htm", "https://www.knowmadmood.com", 4.0f, 3.9f, 3.9f, LocalDate.of(2026, 6, 10), LocalDate.of(2026, 6, 10), LocalDate.of(2026, 5, 28), 366, 251, 141);
 	}
 
 	@Test
 	void testFullDataNoReviewScrolling() {
-		testCompany("Civica", "https://www.glassdoor.es/Resumen/Trabajar-en-Civica-EI_IE35357.12,18.htm", 3.0f, 4.2f, null, LocalDate.of(2026, 1, 30), LocalDate.of(2026, 1, 30), null, 5, 4, 0);
+		testCompany("Civica", "https://www.glassdoor.es/Resumen/Trabajar-en-Civica-EI_IE35357.12,18.htm", "https://www.civica.com", 3.0f, 4.2f, null, LocalDate.of(2026, 1, 30), LocalDate.of(2026, 1, 30), null, 5, 4, 0);
 	}
 	
 	@Test
 	void testFullDataMoreThan1kReviews() {
-		testCompany("Amazon", "https://www.glassdoor.es/Resumen/Trabajar-en-Amazon-EI_IE6036.12,18.htm", 3.5f, 3.6f, 3.8f, LocalDate.of(2026, 6, 15), LocalDate.of(2026, 6, 15), LocalDate.of(2026, 6, 7), 4065, 1492, 521);
+		testCompany("Amazon", "https://www.glassdoor.es/Resumen/Trabajar-en-Amazon-EI_IE6036.12,18.htm", "https://www.aboutamazon.com/", 3.5f, 3.6f, 3.8f, LocalDate.of(2026, 6, 16), LocalDate.of(2026, 6, 15), LocalDate.of(2026, 6, 7), 4067, 1492, 521);
 	}
 	
 	@Test
 	void testFullDataMoreThan10kReviews() {		
-		testCompany("Accenture", "https://www.glassdoor.es/Resumen/Trabajar-en-Accenture-EI_IE4138.12,21.htm", 3.7f, 3.7f, 3.7f, LocalDate.of(2026, 6, 15), LocalDate.of(2026, 6, 15), LocalDate.of(2026, 6, 15), 11329, 1889, 1106);
+		testCompany("Accenture", "https://www.glassdoor.es/Resumen/Trabajar-en-Accenture-EI_IE4138.12,21.htm", "http://www.accenture.com", 3.7f, 3.7f, 3.7f, LocalDate.of(2026, 6, 16), LocalDate.of(2026, 6, 16), LocalDate.of(2026, 6, 15), 11331, 1890, 1106);
 	}
 	
 	@Test
 	void testCompanyNotFound() {
-		testCompany(Scraper.COMPANY_NOT_FOUND, Scraper.COMPANY_NOT_FOUND, null, null, null, null, null, null, null, null, null);
+		testCompany(Scraper.COMPANY_NOT_FOUND, Scraper.COMPANY_NOT_FOUND, Scraper.COMPANY_NOT_FOUND, null, null, null, null, null, null, null, null, null);
 	}
 	
 	// Common test function
-	private void testCompany(String companyName, String glassdoorURL, Float globalScore, Float nationalScore,
+	private void testCompany(String companyName, String glassdoorURL, String expectedExternalURL, Float globalScore, Float nationalScore,
 			Float localScore, LocalDate lastGlobalUpdate, LocalDate lastNationalUpdate, LocalDate lastLocalUpdate,
 			Integer globalNumberOfReviews, Integer nationalNumberOfReviews, Integer localNumberOfReviews) {
 		CompanyInfo companyInfo = new CompanyInfo(companyName, null, null);
@@ -53,7 +53,8 @@ class GlassdoorScraperTest {
 		
 		GlassdoorCompanyInfo glassdoorInfo = result.glassdoorInfo();
 		assertEquals(companyName, glassdoorInfo.company());
-		assertEquals(glassdoorURL, glassdoorInfo.URL());
+		assertEquals(glassdoorURL, glassdoorInfo.glassdoorURL());
+		assertEquals(expectedExternalURL, glassdoorInfo.externalURL());
 		assertEquals(globalScore, glassdoorInfo.globalScore());
 		assertEquals(lastGlobalUpdate, glassdoorInfo.lastGlobalUpdate());
 		assertEquals(globalNumberOfReviews, glassdoorInfo.globalNumberOfReviews());

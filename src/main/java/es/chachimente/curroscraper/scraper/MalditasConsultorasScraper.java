@@ -44,7 +44,7 @@ public class MalditasConsultorasScraper extends Scraper implements ItemProcessor
 	
 	private MalditasConsultorasCompanyInfo scrapeCompanyInfo(String companyName) throws ParseException, IOException {
 		// Fields to extract
-		String companyURL, fullName, shortName, linkedInURL;
+		String malditasConsultorasURL, fullName, shortName, linkedInURL, externalURL;
 		LocalDate lastUpdate;
 		Float rotacionHistorica;
 		
@@ -56,13 +56,13 @@ public class MalditasConsultorasScraper extends Scraper implements ItemProcessor
 
 		// Open the first search result (if any)
 		try {
-			companyURL = document.getElementsByClass("entry-title").first().child(0).absUrl("href");
+			malditasConsultorasURL = document.getElementsByClass("entry-title").first().child(0).absUrl("href");
 		} catch (Exception e) {
 			log.warn(String.format("Company '%s' not found on MalditasConsultoras", companyName));
-			return new MalditasConsultorasCompanyInfo(COMPANY_NOT_FOUND, COMPANY_NOT_FOUND, COMPANY_NOT_FOUND, COMPANY_NOT_FOUND, null, null);
+			return new MalditasConsultorasCompanyInfo(COMPANY_NOT_FOUND, COMPANY_NOT_FOUND, COMPANY_NOT_FOUND, COMPANY_NOT_FOUND, COMPANY_NOT_FOUND, null, null);
 		}
 
-		document = connection.url(companyURL).get();
+		document = connection.url(malditasConsultorasURL).get();
 		
 		// TODO make xpaths local to the main stats table
 		//Element statsTable = document.selectXpath("//*[@class=\"wprt-container\"]/descendant::table[1]").first();
@@ -86,6 +86,12 @@ public class MalditasConsultorasScraper extends Scraper implements ItemProcessor
 			log.error("Could not extract LinkedIn URL for " + companyName + ": " + e);
 			linkedInURL = EXTRACTION_ERROR;
 		}
+		try {
+			externalURL = document.selectXpath("//*[@id=\"main\"]//div[2]/div[1]/h3[2]/a[1]").first().attr("href");
+		} catch (Exception e) {
+			log.error("Could not extract external URL for " + companyName + ": " + e);
+			externalURL = EXTRACTION_ERROR;
+		}
 		
 		// Extract date (e.g. 06/01/2025)
 		try {
@@ -107,6 +113,6 @@ public class MalditasConsultorasScraper extends Scraper implements ItemProcessor
 			rotacionHistorica = null;
 		}
 		
-		return new MalditasConsultorasCompanyInfo(fullName, shortName, linkedInURL, companyURL, rotacionHistorica, lastUpdate);
+		return new MalditasConsultorasCompanyInfo(fullName, shortName, linkedInURL, malditasConsultorasURL, externalURL, rotacionHistorica, lastUpdate);
 	}
 }

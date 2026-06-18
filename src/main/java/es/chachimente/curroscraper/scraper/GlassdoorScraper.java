@@ -48,7 +48,7 @@ public class GlassdoorScraper extends Scraper implements ItemProcessor<CompanyIn
 	
 	private GlassdoorCompanyInfo scrapeCompanyInfo(String companyName) throws ParseException, IOException {	
 		// Fields to extract
-		String company = COMPANY_NOT_FOUND, companyURL = COMPANY_NOT_FOUND; 
+		String company = COMPANY_NOT_FOUND, companyURL = COMPANY_NOT_FOUND, externalURL = COMPANY_NOT_FOUND; 
 		Float globalScore = null, nationalScore = null, localScore = null;
 		LocalDate lastGlobalUpdate = null, lastNationalUpdate = null, lastLocalUpdate = null;
 		Integer globalNumberOfReviews = null, nationalNumberOfReviews = null, localNumberOfReviews = null;
@@ -63,13 +63,20 @@ public class GlassdoorScraper extends Scraper implements ItemProcessor<CompanyIn
 		}
 		catch (Exception e) {
 			log.warn(String.format("Company '%s' not found on Glassdoor", companyName));
-			return new GlassdoorCompanyInfo(COMPANY_NOT_FOUND, COMPANY_NOT_FOUND, null, null, null, null, null, null, null, null, null);
+			return new GlassdoorCompanyInfo(COMPANY_NOT_FOUND, COMPANY_NOT_FOUND, COMPANY_NOT_FOUND, null, null, null, null, null, null, null, null, null);
 		}
 		
 		// Open the first search result (if any)
 		document = connection.url(companyURL).userAgent(USER_AGENT).get();
 		
 		company = document.selectXpath("//h1[contains(@class, 'heading')]").first().text();
+		
+		try {
+			externalURL = document.selectXpath("//a[text()='Ir al sitio']").first().attr("href");
+		} catch (Exception e) {
+			log.warn(String.format("External URL not found for company '%s'", companyName));
+			externalURL = EXTRACTION_ERROR;
+		}
 		
 		// TODO check company matches
 		
@@ -144,7 +151,7 @@ public class GlassdoorScraper extends Scraper implements ItemProcessor<CompanyIn
 			log.warn(String.format("Local number of reviews not found for company '%s'", companyName));
 		}
 
-		return new GlassdoorCompanyInfo(company, companyURL, globalScore, nationalScore, localScore, lastGlobalUpdate, lastNationalUpdate, lastLocalUpdate, globalNumberOfReviews, nationalNumberOfReviews, localNumberOfReviews);
+		return new GlassdoorCompanyInfo(company, companyURL, externalURL, globalScore, nationalScore, localScore, lastGlobalUpdate, lastNationalUpdate, lastLocalUpdate, globalNumberOfReviews, nationalNumberOfReviews, localNumberOfReviews);
 	}
 
 	private Float extractScore(Element document) throws ParseException {
